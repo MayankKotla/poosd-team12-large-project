@@ -84,21 +84,3 @@ The app now matches the real Express API. Base URL is `http://<host>:5000/api` (
 | POST | `/groups/:id/members` | Add Member by email (admin only) |
 | GET | `/users` | Member names / emails, Open Shifts names |
 | POST | `/shifts` | Assign Shift (admin only) |
-| POST | `/shifts/:id/unrelease` | Cancel Offer **(does not exist yet, see below)** |
-
-### Things the backend still needs (tell your teammates)
-
-1. **Cancel offer.** Add to `backend/routes/shifts.js`:
-   ```js
-   router.post("/:id/unrelease", async (req, res) => {
-     const r = await Schedule.updateOne(
-       { _id: req.params.id, user: req.userId, status: "up_for_grabs" },
-       { status: "assigned" });
-     if (!r.matchedCount) return res.status(404).json({ error: "Shift not found or not offered" });
-     res.json({ message: "Shift taken back" });
-   });
-   ```
-   Until then "Cancel Offer" shows an error in the app.
-2. **Open shifts names (optional).** `/shifts/open` returns the owner as a bare id (the app works around this with `GET /users`). Adding `.populate("user", "firstName lastName").populate("group", "groupName")` to that route would be cleaner.
-3. **Shifts have no calendar date**, only `dayOfWeek` + `"HH:mm"`, so the app shows a Monday-Sunday week view instead of a month calendar.
-4. **Deploy.** Mobile needs a reachable server: the emulator uses `10.0.2.2:5000` for a backend running on your PC. The verification email links to `API_URL`, which must be reachable from wherever the user opens the email.
